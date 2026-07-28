@@ -3,7 +3,7 @@
 // =======================================================
 
 import { useEffect } from "react";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import { toast } from "react-toastify";
 
 // =======================================================
@@ -14,101 +14,74 @@ function ScanAttendance() {
 
   useEffect(() => {
 
-    let scanning = false;
+    const html5QrCode = new Html5Qrcode("reader");
 
-    const scanner = new Html5QrcodeScanner(
+    Html5Qrcode.getCameras()
+      .then((devices) => {
 
-      "reader",
+        if (!devices || devices.length === 0) {
+          toast.error("No Camera Found");
+          return;
+        }
 
-      {
-        fps: 10,
-        qrbox: 250
-      },
+        html5QrCode.start(
 
-      false
+          devices[0].id,
 
-    );
+          {
+            fps: 10,
+            qrbox: 250
+          },
 
-    scanner.render(
+          async (decodedText) => {
 
-      async (decodedText) => {
+            try {
 
-        if (scanning) return;
+              const qrData = JSON.parse(decodedText);
 
-        scanning = true;
+              const response = await fetch(
+                "https://campusconnect-backend-3hba.onrender.com/api/registrations/attendance",
+                {
+                  method: "POST",
+                  headers: {
+                    "Content-Type": "application/json"
+                  },
+                  body: JSON.stringify({
+                    ticketId: qrData.ticketId
+                  })
+                }
+              );
 
-        try {
+              const data = await response.json();
 
-          const qrData = JSON.parse(decodedText);
+              if (response.ok) {
+                toast.success(data.message);
+              } else {
+                toast.error(data.message);
+              }
 
-          console.log("QR Data :", qrData);
-
-          const response = await fetch(
-
-            "https://campusconnect-backend-3hba.onrender.com/api/registrations/attendance",
-
-            {
-
-              method: "POST",
-
-              headers: {
-
-                "Content-Type": "application/json"
-
-              },
-
-              body: JSON.stringify({
-
-                ticketId: qrData.ticketId
-
-              })
-
+            } catch {
+              toast.error("Invalid QR Code");
             }
 
-          );
+          },
 
-          const data = await response.json();
+          () => {}
 
-          if (response.ok) {
+        );
 
-            toast.success(data.message);
+      })
 
-          }
+      .catch(() => {
 
-          else {
+        toast.error("Camera Permission Denied");
 
-            toast.error(data.message);
-
-          }
-
-        }
-
-        catch (error) {
-
-          console.log(error);
-
-          toast.error("Invalid QR Code");
-
-        }
-
-        // Allow next scan after 2 seconds
-        setTimeout(() => {
-
-          scanning = false;
-
-        }, 2000);
-
-      },
-
-      (error) => {
-        // Ignore scan errors while camera is searching
-      }
-
-    );
+      });
 
     return () => {
 
-      scanner.clear().catch(() => {});
+      html5QrCode.stop().catch(() => {});
+      html5QrCode.clear().catch(() => {});
 
     };
 
@@ -130,7 +103,7 @@ function ScanAttendance() {
 
         <p className="text-center mt-6 text-gray-500">
 
-          Scan the student's QR Ticket
+          Scan Student QR Ticket
 
         </p>
 
@@ -141,9 +114,5 @@ function ScanAttendance() {
   );
 
 }
-
-// =======================================================
-// EXPORT
-// =======================================================
 
 export default ScanAttendance;
