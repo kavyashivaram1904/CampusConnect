@@ -250,26 +250,43 @@ if (
 
           <div className="flex flex-wrap gap-4 mt-6 text-gray-700">
 
-            <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full">
+  <span className="bg-blue-100 text-blue-700 px-4 py-2 rounded-full">
+    {event.category}
+  </span>
 
-              {event.category}
+  <span>
+    📅 {event.date}
+  </span>
 
-            </span>
+  <span>
+    📍 {event.venue}
+  </span>
 
-            <span>
+</div>
 
-              📅 {event.date}
+<hr className="my-6" />
 
-            </span>
+<div className="bg-gray-50 border rounded-xl p-5">
 
-            <span>
+  <h3 className="text-xl font-bold text-pink-600 mb-3">
+    👨‍💼 Event Coordinator
+  </h3>
 
-              📍 {event.venue}
+  <p className="text-gray-700 mb-2">
+    <strong>Name:</strong> {event.coordinatorName}
+  </p>
 
-            </span>
+  <p className="text-gray-700">
+    <strong>Email:</strong>{" "}
+    <a
+      href={`mailto:${event.coordinatorEmail}`}
+      className="text-blue-600 hover:underline"
+    >
+      {event.coordinatorEmail}
+    </a>
+  </p>
 
-          </div>
-
+</div>
           {/* ===================================================
               SECTION 11 : DESCRIPTION
           =================================================== */}
