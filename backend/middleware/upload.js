@@ -1,44 +1,44 @@
 // =======================================================
-// SECTION 1 : IMPORTS
+// IMPORTS
 // =======================================================
 
 const multer = require("multer");
+const path = require("path");
+const fs = require("fs");
 
 // =======================================================
-// SECTION 2 : STORAGE CONFIGURATION
+// CREATE uploads FOLDER IF NOT EXISTS
+// =======================================================
+
+const uploadPath = path.join(__dirname, "../uploads");
+
+if (!fs.existsSync(uploadPath)) {
+    fs.mkdirSync(uploadPath, { recursive: true });
+}
+
+// =======================================================
+// STORAGE
 // =======================================================
 
 const storage = multer.diskStorage({
 
-    destination: function (req, file, cb) {
-
-        cb(null, "uploads/");
-
+    destination(req, file, cb) {
+        cb(null, uploadPath);
     },
 
-    filename: function (req, file, cb) {
+    filename(req, file, cb) {
 
-        const uniqueName =
-            Date.now() + "-" + file.originalname;
-
-        cb(null, uniqueName);
+        cb(
+            null,
+            Date.now() + "-" + file.originalname
+        );
 
     }
 
 });
 
 // =======================================================
-// SECTION 3 : MULTER
+// EXPORT
 // =======================================================
 
-const upload = multer({
-
-    storage
-
-});
-
-// =======================================================
-// SECTION 4 : EXPORT
-// =======================================================
-
-module.exports = upload;
+module.exports = multer({ storage });
