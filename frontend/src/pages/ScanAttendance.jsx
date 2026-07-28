@@ -2,7 +2,7 @@
 // IMPORTS
 // =======================================================
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Html5Qrcode } from "html5-qrcode";
 import { toast } from "react-toastify";
 
@@ -100,6 +100,30 @@ function ScanAttendance() {
         </h1>
 
         <div id="reader"></div>
+        <div className="my-8 text-center">
+
+  <p className="font-semibold text-gray-500 mb-3">
+
+    OR
+
+  </p>
+
+  <input
+    type="text"
+    placeholder="Enter Ticket ID"
+    value={ticketId}
+    onChange={(e) => setTicketId(e.target.value)}
+    className="w-full border p-3 rounded-xl"
+  />
+
+  <button
+    onClick={markAttendanceManual}
+    className="w-full bg-blue-600 text-white py-3 rounded-xl mt-4 hover:bg-blue-700"
+  >
+    Mark Attendance
+  </button>
+
+</div>
 
         <p className="text-center mt-6 text-gray-500">
 
@@ -114,5 +138,48 @@ function ScanAttendance() {
   );
 
 }
+async function markAttendanceManual() {
 
+  if (!ticketId.trim()) {
+
+    toast.error("Enter Ticket ID");
+    return;
+
+  }
+
+  try {
+
+    const response = await fetch(
+      "https://campusconnect-backend-3hba.onrender.com/api/registrations/attendance",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          ticketId
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok) {
+
+      toast.success(data.message);
+      setTicketId("");
+
+    } else {
+
+      toast.error(data.message);
+
+    }
+
+  } catch {
+
+    toast.error("Something went wrong");
+
+  }
+
+}
 export default ScanAttendance;
