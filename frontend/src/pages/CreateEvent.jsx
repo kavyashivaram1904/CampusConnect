@@ -60,6 +60,11 @@ const handleSubmit = async (e) => {
 
   const user = JSON.parse(localStorage.getItem("user"));
 
+if (!user) {
+  toast.error("Please login first");
+  return;
+}
+
   const formData = new FormData();
 
   formData.append("title", event.title);
@@ -137,9 +142,9 @@ const handleSubmit = async (e) => {
 
           <select
   name="category"
-  value={form.category}
+  value={event.category}
   onChange={handleChange}
-  className="w-full p-3 border rounded-xl focus:outline-none focus:ring-2 focus:ring-pink-500"
+  className="w-full border p-3 rounded-lg"
 >
   <option value="">Select Category</option>
   <option value="Technical">Technical</option>
@@ -163,15 +168,6 @@ const handleSubmit = async (e) => {
             className="w-full border p-3 rounded-lg"
             required
           />
-<input
-    type="number"
-    name="fee"
-    placeholder="Registration Fee (₹)"
-    value={event.fee}
-    onChange={handleChange}
-    className="w-full border p-3 rounded-lg"
-    required
-/>
 
 <input
   type="number"
