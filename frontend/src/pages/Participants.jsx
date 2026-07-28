@@ -11,22 +11,40 @@ import { useParams } from "react-router-dom";
 
 function Participants() {
 
+    // =======================================================
+    // STATES
+    // =======================================================
+
     const { eventId } = useParams();
 
     const [participants, setParticipants] = useState([]);
     const [search, setSearch] = useState("");
 
+    // =======================================================
+    // FETCH PARTICIPANTS
+    // =======================================================
+
     useEffect(() => {
 
         async function loadParticipants() {
 
-            const response = await fetch(
-                `https://campusconnect-backend-3hba.onrender.com/api/registrations/participants/${eventId}`
-            );
+            try {
 
-            const data = await response.json();
+                const response = await fetch(
+                    `https://campusconnect-backend-3hba.onrender.com/api/registrations/participants/${eventId}`
+                );
 
-            setParticipants(data);
+                const data = await response.json();
+
+                setParticipants(data);
+
+            }
+
+            catch (error) {
+
+                console.log(error);
+
+            }
 
         }
 
@@ -56,6 +74,10 @@ function Participants() {
 
     });
 
+    // =======================================================
+    // UI
+    // =======================================================
+
     return (
 
         <div className="min-h-screen bg-pink-50 p-10">
@@ -67,7 +89,7 @@ function Participants() {
             </h1>
 
             {/* =======================================================
-                SEARCH BAR
+                SEARCH
             ======================================================= */}
 
             <input
@@ -84,6 +106,10 @@ function Participants() {
 
             />
 
+            {/* =======================================================
+                TABLE
+            ======================================================= */}
+
             <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
 
                 <table className="w-full">
@@ -98,6 +124,10 @@ function Participants() {
 
                             <th className="p-4">Payment</th>
 
+                            <th className="p-4">Attendance</th>
+
+                            <th className="p-4">Attendance Time</th>
+
                             <th className="p-4">Registration Date</th>
 
                         </tr>
@@ -111,7 +141,7 @@ function Participants() {
                             <tr>
 
                                 <td
-                                    colSpan="4"
+                                    colSpan="6"
                                     className="text-center p-8 text-gray-500"
                                 >
 
@@ -142,17 +172,59 @@ function Participants() {
 
                                     </td>
 
-                                    <td className="p-4 text-green-600 font-bold">
+                                    <td className="p-4">
 
-                                        {student.paymentStatus}
+                                        <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
+
+                                            {student.paymentStatus}
+
+                                        </span>
 
                                     </td>
 
                                     <td className="p-4">
 
-                                        {new Date(
-                                            student.registrationDate
-                                        ).toLocaleDateString()}
+                                        {student.attendance ? (
+
+                                            <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full font-semibold">
+
+                                                ✅ Present
+
+                                            </span>
+
+                                        ) : (
+
+                                            <span className="bg-red-100 text-red-700 px-3 py-1 rounded-full font-semibold">
+
+                                                ❌ Pending
+
+                                            </span>
+
+                                        )}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        {student.attendanceTime
+
+                                            ? new Date(
+                                                student.attendanceTime
+                                            ).toLocaleString()
+
+                                            : "-"}
+
+                                    </td>
+
+                                    <td className="p-4">
+
+                                        {student.registrationDate
+
+                                            ? new Date(
+                                                student.registrationDate
+                                            ).toLocaleDateString()
+
+                                            : "-"}
 
                                     </td>
 
