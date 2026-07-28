@@ -12,16 +12,78 @@ import { toast } from "react-toastify";
 
 function ScanAttendance() {
 
+  // =======================================================
+  // STATES
+  // =======================================================
+
+  const [ticketId, setTicketId] = useState("");
+
+  // =======================================================
+  // MANUAL ATTENDANCE
+  // =======================================================
+
+  async function markAttendanceManual() {
+
+    if (!ticketId.trim()) {
+
+      toast.error("Please enter Ticket ID");
+      return;
+
+    }
+
+    try {
+
+      const response = await fetch(
+        "https://campusconnect-backend-3hba.onrender.com/api/registrations/attendance",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            ticketId,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+
+        toast.success(data.message);
+        setTicketId("");
+
+      } else {
+
+        toast.error(data.message);
+
+      }
+
+    } catch {
+
+      toast.error("Something went wrong");
+
+    }
+
+  }
+
+  // =======================================================
+  // QR SCANNER
+  // =======================================================
+
   useEffect(() => {
 
     const html5QrCode = new Html5Qrcode("reader");
 
     Html5Qrcode.getCameras()
+
       .then((devices) => {
 
         if (!devices || devices.length === 0) {
+
           toast.error("No Camera Found");
           return;
+
         }
 
         html5QrCode.start(
@@ -30,7 +92,7 @@ function ScanAttendance() {
 
           {
             fps: 10,
-            qrbox: 250
+            qrbox: 250,
           },
 
           async (decodedText) => {
@@ -44,24 +106,30 @@ function ScanAttendance() {
                 {
                   method: "POST",
                   headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                   },
                   body: JSON.stringify({
-                    ticketId: qrData.ticketId
-                  })
+                    ticketId: qrData.ticketId,
+                  }),
                 }
               );
 
               const data = await response.json();
 
               if (response.ok) {
+
                 toast.success(data.message);
+
               } else {
+
                 toast.error(data.message);
+
               }
 
             } catch {
+
               toast.error("Invalid QR Code");
+
             }
 
           },
@@ -80,12 +148,18 @@ function ScanAttendance() {
 
     return () => {
 
-      html5QrCode.stop().catch(() => {});
-      html5QrCode.clear().catch(() => {});
+      html5QrCode
+        .stop()
+        .then(() => html5QrCode.clear())
+        .catch(() => {});
 
     };
 
   }, []);
+
+  // =======================================================
+  // UI
+  // =======================================================
 
   return (
 
@@ -100,34 +174,37 @@ function ScanAttendance() {
         </h1>
 
         <div id="reader"></div>
-        <div className="my-8 text-center">
 
-  <p className="font-semibold text-gray-500 mb-3">
+        <div className="my-8">
 
-    OR
+          <p className="text-center font-semibold text-gray-500 mb-4">
 
-  </p>
+            OR
 
-  <input
-    type="text"
-    placeholder="Enter Ticket ID"
-    value={ticketId}
-    onChange={(e) => setTicketId(e.target.value)}
-    className="w-full border p-3 rounded-xl"
-  />
+          </p>
 
-  <button
-    onClick={markAttendanceManual}
-    className="w-full bg-blue-600 text-white py-3 rounded-xl mt-4 hover:bg-blue-700"
-  >
-    Mark Attendance
-  </button>
+          <input
+            type="text"
+            placeholder="Enter Ticket ID"
+            value={ticketId}
+            onChange={(e) => setTicketId(e.target.value)}
+            className="w-full border p-3 rounded-xl"
+          />
 
-</div>
+          <button
+            onClick={markAttendanceManual}
+            className="w-full bg-blue-600 text-white py-3 rounded-xl mt-4 hover:bg-blue-700"
+          >
 
-        <p className="text-center mt-6 text-gray-500">
+            Mark Attendance
 
-          Scan Student QR Ticket
+          </button>
+
+        </div>
+
+        <p className="text-center text-gray-500">
+
+          Scan Student QR Ticket or Enter Ticket ID
 
         </p>
 
@@ -138,48 +215,9 @@ function ScanAttendance() {
   );
 
 }
-async function markAttendanceManual() {
 
-  if (!ticketId.trim()) {
+// =======================================================
+// EXPORT
+// =======================================================
 
-    toast.error("Enter Ticket ID");
-    return;
-
-  }
-
-  try {
-
-    const response = await fetch(
-      "https://campusconnect-backend-3hba.onrender.com/api/registrations/attendance",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          ticketId
-        })
-      }
-    );
-
-    const data = await response.json();
-
-    if (response.ok) {
-
-      toast.success(data.message);
-      setTicketId("");
-
-    } else {
-
-      toast.error(data.message);
-
-    }
-
-  } catch {
-
-    toast.error("Something went wrong");
-
-  }
-
-}
 export default ScanAttendance;
